@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Starlight Auth - Gateway</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #0d0d12;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .container {
+            background: rgba(20, 20, 28, 0.8);
+            border: 2px solid #ff007f;
+            box-shadow: 0 0 20px rgba(255, 0, 127, 0.2);
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+        h1 {
+            color: #ff007f;
+            font-size: 24px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(255, 0, 127, 0.5);
+        }
+        p {
+            color: #a0a0b0;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+        .gateway-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .timer-wait {
+            color: #00ffcc;
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+        .btn-login {
+            width: 100%;
+            background: #ff007f;
+            color: #ffffff;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 18px;
+            letter-spacing: 1px;
+            transition: 0.2s ease;
+            box-shadow: 0 0 15px rgba(255, 0, 127, 0.3);
+        }
+        .btn-login:disabled {
+            background: #2a1824;
+            color: #66505c;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        .key-section {
+            display: none;
+        }
+        .box-key {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: flex-end;
+            margin-bottom: 15px;
+        }
+        .btn-copy {
+            background: #ff007f;
+            color: #ffffff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+            transition: 0.2s ease;
+        }
+        .btn-copy:hover {
+            background: #e00070;
+            box-shadow: 0 0 10px rgba(255, 0, 127, 0.4);
+        }
+        .input-key {
+            width: 100%;
+            background: #161622;
+            border: 1px solid #303045;
+            color: #00ffcc;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 14px;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            outline: none;
+            letter-spacing: 0.5px;
+        }
+        .timer-text {
+            color: #a0a0b0;
+            font-size: 12px;
+            text-align: center;
+            margin-top: 5px;
+        }
+        .timer-highlight {
+            color: #ff007f;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>KEY SYSTEM AUTH</h1>
+        <p id="subText">Please complete the verification security gate</p>
+        
+        <div id="gatewayArea" class="gateway-section">
+            <div id="waitTimer" class="timer-wait">Remaining 5s For Key</div>
+            <button id="loginBtn" class="btn-login" onclick="showKeyArea()" disabled>LOGIN</button>
+        </div>
+
+        <div id="keyArea" class="key-section">
+            <div class="box-key">
+                <button class="btn-copy" onclick="copyKey()">Copy</button>
+                <input type="text" id="keyField" class="input-key" value="" readonly>
+            </div>
+            <div class="timer-text">
+                Key Expires In: <span id="countdown" class="timer-highlight">24 Hours</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let sisaWaktuTunggu = 5;
+        const waitTimerElement = document.getElementById('waitTimer');
+        const loginBtnElement = document.getElementById('loginBtn');
+
+        const gateInterval = setInterval(() => {
+            sisaWaktuTunggu--;
+            if (sisaWaktuTunggu <= 0) {
+                clearInterval(gateInterval);
+                waitTimerElement.style.color = "#ff007f";
+                waitTimerElement.innerText = "Ready To Login";
+                loginBtnElement.disabled = false;
+            } else {
+                waitTimerElement.innerText = `Remaining ${sisaWaktuTunggu}s For Key`;
+            }
+        }, 1000);
+
+        function generateRandomKey() {
+            const karakter = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            let hasilAcak = "";
+            for (let i = 0; i < 30; i++) {
+                hasilAcak += karakter.charAt(Math.floor(Math.random() * karakter.length));
+            }
+            return `Key-Free_${hasilAcak}`;
+        }
+
+        function showKeyArea() {
+            document.getElementById('gatewayArea').style.display = 'none';
+            document.getElementById('subText').innerText = 'Copy your key below and paste it into the executor GUI';
+            document.getElementById('keyArea').style.display = 'block';
+            
+            const generatedKey = generateRandomKey();
+            document.getElementById('keyField').value = generatedKey;
+            
+            startCountdown();
+        }
+
+        function copyKey() {
+            const keyInput = document.getElementById('keyField');
+            keyInput.select();
+            keyInput.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(keyInput.value);
+
+            const copyBtn = document.querySelector('.btn-copy');
+            copyBtn.innerText = 'Copied!';
+            copyBtn.style.background = '#00ffcc';
+            copyBtn.style.color = '#0d0d12';
+            
+            setTimeout(() => {
+                copyBtn.innerText = 'Copy';
+                copyBtn.style.background = '#ff007f';
+                copyBtn.style.color = '#ffffff';
+            }, 2000);
+        }
+
+        let totalDetik = 24 * 60 * 60; 
+
+        function startCountdown() {
+            const timerElement = document.getElementById('countdown');
+            
+            const hitung = setInterval(() => {
+                if (totalDetik <= 0) {
+                    clearInterval(hitung);
+                    timerElement.innerText = "Expired";
+                    document.getElementById('keyField').value = "KEY_EXPIRED";
+                    return;
+                }
+
+                totalDetik--;
+
+                let jam = Math.floor(totalDetik / 3600);
+                let menit = Math.floor((totalDetik % 3600) / 60);
+                let detik = totalDetik % 60;
+
+                let formatJam = jam.toString().padStart(2, '0');
+                let formatMenit = menit.toString().padStart(2, '0');
+                let formatDetik = detik.toString().padStart(2, '0');
+
+                timerElement.innerText = `${formatJam}h ${formatMenit}m ${formatDetik}s`;
+            }, 1000);
+        }
+    </script>
+</body>
+  </html>
